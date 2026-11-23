@@ -172,3 +172,113 @@ function deleteCustomer(id) {
         populateCustomerDropdown();
     }
 }
+
+function initItemCRUD() {
+    const form = document.getElementById("item-form");
+    const editCodeInput = document.getElementById("item-edit-code");
+    const codeInput = document.getElementById("item-code");
+    const nameInput = document.getElementById("item-name");
+    const catInput = document.getElementById("item-category");
+    const priceInput = document.getElementById("item-price");
+    const qtyInput = document.getElementById("item-qty");
+    const formTitle = document.getElementById("item-form-title");
+    const btnCancel = document.getElementById("btn-cancel-item");
+
+    renderItemTable();
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const editCode = editCodeInput.value;
+        const category = catInput.value;
+
+        let icon = "🍔";
+        if (category === "Fries") icon = "🍟";
+        if (category === "Drinks") icon = "🥤";
+
+        const itemData = {
+            code: codeInput.value.trim(),
+            name: nameInput.value.trim(),
+            category: category,
+            price: parseFloat(priceInput.value),
+            stock: parseInt(qtyInput.value),
+            icon: icon
+        };
+
+        if (editCode) {
+            const index = items.findIndex(i => i.code === editCode);
+            if (index !== -1) {
+                items[index] = itemData;
+            }
+        } else {
+            const exists = items.some(i => i.code.toLowerCase() === itemData.code.toLowerCase());
+            if (exists) {
+                alert("Item Code already exists!");
+                return;
+            }
+            items.push(itemData);
+        }
+
+        saveStoredData();
+        renderItemTable();
+        renderProductGrid();
+        resetItemForm();
+    });
+
+    btnCancel.addEventListener("click", resetItemForm);
+
+    function resetItemForm() {
+        form.reset();
+        editCodeInput.value = "";
+        codeInput.disabled = false;
+        formTitle.textContent = "Add New Food Item";
+    }
+}
+
+function renderItemTable() {
+    const tbody = document.getElementById("item-table-body");
+    tbody.innerHTML = "";
+
+    items.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${item.code}</td>
+            <td>${item.icon} ${item.name}</td>
+            <td>${item.category}</td>
+            <td>Rs. ${item.price.toFixed(2)}</td>
+            <td>${item.stock}</td>
+            <td>
+                <button class="action-btn action-edit" onclick="editItem('${item.code}')">Edit</button>
+                <button class="action-btn action-delete" onclick="deleteItem('${item.code}')">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function editItem(code) {
+    const item = items.find(i => i.code === code);
+    if (!item) return;
+
+    document.getElementById("item-edit-code").value = item.code;
+    const codeInput = document.getElementById("item-code");
+    codeInput.value = item.code;
+    codeInput.disabled = true;
+
+    document.getElementById("item-name").value = item.name;
+    document.getElementById("item-category").value = item.category;
+    document.getElementById("item-price").value = item.price;
+    document.getElementById("item-qty").value = item.stock;
+    document.getElementById("item-form-title").textContent = "Edit Item: " + item.code;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function deleteItem(code) {
+    if (confirm("Are you sure you want to delete item " + code + "?")) {
+        items = items.filter(i => i.code !== code);
+        saveStoredData();
+        renderItemTable();
+        renderProductGrid();
+    }
+}
