@@ -444,3 +444,133 @@ function updateCartSummary() {
     document.getElementById("cart-subtotal").textContent = `Rs. ${subtotal.toFixed(2)}`;
     document.getElementById("cart-total").textContent = `Rs. ${finalTotal.toFixed(2)}`;
 }
+
+function placeOrder() {
+    if (cart.length === 0) {
+        alert("Cart is empty! Please select items first.");
+        return;
+    }
+
+    const customerSelect = document.getElementById("order-customer-select");
+    const customerId = customerSelect.value;
+    let customerName = "Walk-in Customer";
+
+    if (customerId) {
+        const found = customers.find(c => c.id === customerId);
+        if (found) customerName = `${found.name} (${found.id})`;
+    }
+
+    let subtotal = 0;
+    cart.forEach(item => {
+        subtotal += item.price * item.qty;
+    });
+
+    const discountPercent = parseFloat(document.getElementById("cart-discount").value) || 0;
+    const discountAmount = (subtotal * discountPercent) / 100;
+    const finalTotal = subtotal - discountAmount;
+
+    cart.forEach(cartItem => {
+        const product = items.find(i => i.code === cartItem.code);
+        if (product) {
+            product.stock -= cartItem.qty;
+        }
+    });
+
+    const orderId = "ORD-" + String(orderCounter).padStart(3, "0");
+    orderCounter++;
+
+    const newOrder = {
+        id: orderId,
+        date: new Date().toLocaleString(),
+        customer: customerName,
+        items: [...cart],
+        subtotal: subtotal,
+        discount: discountPercent,
+        total: finalTotal
+    };
+
+    orders.unshift(newOrder);
+
+    saveStoredData();
+    renderProductGrid();
+    renderItemTable();
+
+    showReceipt(newOrder);
+
+    cart = [];
+    document.getElementById("cart-discount").value = "0";
+    document.getElementById("order-id-display").textContent = "#ORD-" + String(orderCounter).padStart(3, "0");
+    renderCart();
+}
+
+function showReceipt(order) {
+    document.getElementById("receipt-order-id").textContent = "Order #" + order.id;
+    document.getElementById("receipt-date").textContent = order.date;
+    document.getElementById("receipt-customer").textContent = order.customer;
+
+    const itemsContainer = document.getElementById("receipt-items-list");
+    itemsContainer.innerHTML = "";
+
+    order.items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "receipt-item-row";
+        row.innerHTML = `
+            <span>${item.name} x ${item.qty}</span>
+            <span>Rs. ${(item.price * item.qty).toFixed(2)}</span>
+        `;
+        itemsContainer.appendChild(row);
+    });
+
+    document.getElementById("receipt-subtotal").textContent = `Rs. ${order.subtotal.toFixed(2)}`;
+    document.getElementById("receipt-discount").textContent = `${order.discount}%`;
+    document.getElementById("receipt-final-total").textContent = `Rs. ${order.total.toFixed(2)}`;
+
+    document.getElementById("receipt-modal").classList.add("active");
+}
+
+function initOrdersView() {
+    renderOrdersTable();
+}
+
+function renderOrdersTable() {
+    const tbody = document.getElementById("orders-table-body");
+    tbody.innerHTML = "";
+
+    if (orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No orders placed yet</td></tr>`;
+        return;
+    }
+
+    orders.forEach(order => {
+        const totalItemsCount = order.items.reduce((sum, item) => sum + item.qty, 0);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${order.id}</strong></td>
+            <td>${order.date}</td>
+            <td>${order.customer}</td>
+            <td>${totalItemsCount} items</td>
+            <td>${order.discount}%</td>
+            <td><strong>Rs. ${order.total.toFixed(2)}</strong></td>
+            <td>
+                <button class="action-btn action-edit" onclick="viewOrderReceipt('${order.id}')">Receipt</button>
+                <button class="action-btn action-delete" onclick="deleteOrder('${order.id}')">Cancel</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function viewOrderReceipt(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+        showReceipt(order);
+    }
+}
+
+function deleteOrder(orderId) {
+    if (confirm("Are you sure you want to cancel order " + orderId + "?")) {
+        orders = orders.filter(o => o.id !== orderId);
+        saveStoredData();
+        renderOrdersTable();
+    }
+}
