@@ -117,6 +117,11 @@ function renderCustomerTable() {
     const tbody = document.getElementById("customer-table-body");
     tbody.innerHTML = "";
 
+    if (customers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No customers added yet. Click '+ Add Customer' above to add one.</td></tr>`;
+        return;
+    }
+
     customers.forEach(cust => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
