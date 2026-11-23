@@ -26,6 +26,60 @@
 
     <main class="content-container">
 
+        <!-- POS Terminal Section -->
+        <section id="pos-section" class="tab-content active">
+            <div class="pos-layout">
+                <!-- Products catalog left side -->
+                <div class="pos-products">
+                    <div class="category-tabs">
+                        <button class="cat-btn active" data-cat="all">All Items</button>
+                        <button class="cat-btn" data-cat="Burgers">Burgers</button>
+                        <button class="cat-btn" data-cat="Fries">Fries</button>
+                        <button class="cat-btn" data-cat="Drinks">Drinks</button>
+                    </div>
+
+                    <div id="product-grid" class="product-grid">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Cart and checkout right side -->
+                <div class="pos-cart">
+                    <div class="cart-header">
+                        <h3>Current Order</h3>
+                        <span id="order-id-display">#ORD-001</span>
+                    </div>
+
+                    <div class="customer-select-box">
+                        <label for="order-customer-select">Select Customer:</label>
+                        <select id="order-customer-select">
+                            <option value="">Walk-in Customer</option>
+                        </select>
+                    </div>
+
+                    <div class="cart-items" id="cart-items-container">
+                        <p class="empty-cart-msg">No items in cart</p>
+                    </div>
+
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">Rs. 0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Discount (%)</span>
+                            <input type="number" id="cart-discount" value="0" min="0" max="100">
+                        </div>
+                        <div class="summary-row total-row">
+                            <span>Total</span>
+                            <span id="cart-total">Rs. 0.00</span>
+                        </div>
+                        <button id="btn-place-order" class="btn-checkout">Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
 </body>
