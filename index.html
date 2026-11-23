@@ -201,6 +201,67 @@
             </div>
         </section>
 
+        <!-- Order History Section -->
+        <section id="orders-section" class="tab-content">
+            <div class="section-header">
+                <h2>Orders & Billing History</h2>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Items Count</th>
+                            <th>Discount</th>
+                            <th>Total (Rs.)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Order Receipt Modal -->
+        <div id="receipt-modal" class="modal-overlay">
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <h3>GrillMaster Burgers</h3>
+                    <p>iCET Fast Food Lane</p>
+                    <p id="receipt-order-id">Order #ORD-001</p>
+                    <p id="receipt-date"></p>
+                </div>
+                <div class="receipt-body">
+                    <p><strong>Customer:</strong> <span id="receipt-customer">Walk-in Customer</span></p>
+                    <hr>
+                    <div id="receipt-items-list">
+                        <!-- Filled by JS -->
+                    </div>
+                    <hr>
+                    <div class="receipt-summary-line">
+                        <span>Subtotal:</span>
+                        <span id="receipt-subtotal">Rs. 0.00</span>
+                    </div>
+                    <div class="receipt-summary-line">
+                        <span>Discount:</span>
+                        <span id="receipt-discount">0%</span>
+                    </div>
+                    <div class="receipt-summary-line total">
+                        <span>Final Bill:</span>
+                        <span id="receipt-final-total">Rs. 0.00</span>
+                    </div>
+                </div>
+                <div class="receipt-footer">
+                    <button class="btn-primary" id="btn-close-receipt">Close</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
 </body>
