@@ -80,6 +80,62 @@
             </div>
         </section>
 
+        <!-- Customer Management Section -->
+        <section id="customers-section" class="tab-content">
+            <div class="section-header">
+                <h2>Customer Management</h2>
+                <button id="btn-show-add-customer" class="btn-primary">+ Add Customer</button>
+            </div>
+
+            <!-- Customer Form Card -->
+            <div id="customer-form-container" class="card-form">
+                <h3 id="customer-form-title">Add New Customer</h3>
+                <form id="customer-form">
+                    <input type="hidden" id="customer-edit-id">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cust-id">Customer ID</label>
+                            <input type="text" id="cust-id" placeholder="C001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cust-name">Full Name</label>
+                            <input type="text" id="cust-name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cust-phone">Phone Number</label>
+                            <input type="tel" id="cust-phone" placeholder="0771234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cust-address">Address</label>
+                            <input type="text" id="cust-address" placeholder="Colombo, Sri Lanka">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" id="btn-save-customer">Save Customer</button>
+                        <button type="button" class="btn-secondary" id="btn-cancel-customer">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Customer Table -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
 </body>
