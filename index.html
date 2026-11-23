@@ -136,6 +136,71 @@
             </div>
         </section>
 
+        <!-- Item / Product Management Section -->
+        <section id="items-section" class="tab-content">
+            <div class="section-header">
+                <h2>Product & Item Management</h2>
+                <button id="btn-show-add-item" class="btn-primary">+ Add Item</button>
+            </div>
+
+            <!-- Item Form Card -->
+            <div id="item-form-container" class="card-form">
+                <h3 id="item-form-title">Add New Food Item</h3>
+                <form id="item-form">
+                    <input type="hidden" id="item-edit-code">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="item-code">Item Code</label>
+                            <input type="text" id="item-code" placeholder="P001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-name">Item Name</label>
+                            <input type="text" id="item-name" placeholder="Classic Beef Burger" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-category">Category</label>
+                            <select id="item-category" required>
+                                <option value="Burgers">Burgers</option>
+                                <option value="Fries">Fries</option>
+                                <option value="Drinks">Drinks</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-price">Unit Price (Rs.)</label>
+                            <input type="number" id="item-price" step="0.01" placeholder="850.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-qty">Stock Quantity</label>
+                            <input type="number" id="item-qty" placeholder="50" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" id="btn-save-item">Save Item</button>
+                        <button type="button" class="btn-secondary" id="btn-cancel-item">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Item Table -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
 </body>
