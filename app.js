@@ -282,3 +282,165 @@ function deleteItem(code) {
         renderProductGrid();
     }
 }
+
+let selectedCategory = "all";
+
+function initPOS() {
+    renderProductGrid();
+    populateCustomerDropdown();
+
+    const catButtons = document.querySelectorAll(".cat-btn");
+    catButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            catButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            selectedCategory = this.getAttribute("data-cat");
+            renderProductGrid();
+        });
+    });
+
+    document.getElementById("cart-discount").addEventListener("input", updateCartSummary);
+    document.getElementById("btn-place-order").addEventListener("click", placeOrder);
+    document.getElementById("btn-close-receipt").addEventListener("click", () => {
+        document.getElementById("receipt-modal").classList.remove("active");
+    });
+}
+
+function populateCustomerDropdown() {
+    const select = document.getElementById("order-customer-select");
+    const currentValue = select.value;
+    select.innerHTML = `<option value="">Walk-in Customer</option>`;
+
+    customers.forEach(cust => {
+        const option = document.createElement("option");
+        option.value = cust.id;
+        option.textContent = `${cust.id} - ${cust.name}`;
+        select.appendChild(option);
+    });
+
+    select.value = currentValue;
+}
+
+function renderProductGrid() {
+    const grid = document.getElementById("product-grid");
+    grid.innerHTML = "";
+
+    const filtered = selectedCategory === "all" 
+        ? items 
+        : items.filter(item => item.category === selectedCategory);
+
+    filtered.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.innerHTML = `
+            <div class="item-icon">${item.icon}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">Rs. ${item.price.toFixed(2)}</div>
+            <div class="item-stock">Stock: ${item.stock}</div>
+        `;
+        card.addEventListener("click", () => addToCart(item.code));
+        grid.appendChild(card);
+    });
+}
+
+function addToCart(code) {
+    const item = items.find(i => i.code === code);
+    if (!item) return;
+
+    if (item.stock <= 0) {
+        alert("Sorry, " + item.name + " is out of stock!");
+        return;
+    }
+
+    const cartItem = cart.find(ci => ci.code === code);
+    if (cartItem) {
+        if (cartItem.qty + 1 > item.stock) {
+            alert("Cannot add more than available stock (" + item.stock + ")");
+            return;
+        }
+        cartItem.qty++;
+    } else {
+        cart.push({
+            code: item.code,
+            name: item.name,
+            price: item.price,
+            qty: 1
+        });
+    }
+
+    renderCart();
+}
+
+function updateCartQty(code, change) {
+    const cartItem = cart.find(ci => ci.code === code);
+    const item = items.find(i => i.code === code);
+    if (!cartItem || !item) return;
+
+    const newQty = cartItem.qty + change;
+    if (newQty <= 0) {
+        removeFromCart(code);
+        return;
+    }
+
+    if (newQty > item.stock) {
+        alert("Cannot add more than available stock (" + item.stock + ")");
+        return;
+    }
+
+    cartItem.qty = newQty;
+    renderCart();
+}
+
+function removeFromCart(code) {
+    cart = cart.filter(ci => ci.code !== code);
+    renderCart();
+}
+
+function renderCart() {
+    const container = document.getElementById("cart-items-container");
+    container.innerHTML = "";
+
+    if (cart.length === 0) {
+        container.innerHTML = `<p class="empty-cart-msg">No items in cart</p>`;
+        updateCartSummary();
+        return;
+    }
+
+    cart.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "cart-item-row";
+        row.innerHTML = `
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">Rs. ${item.price.toFixed(2)} x ${item.qty}</div>
+            </div>
+            <div class="cart-item-controls">
+                <button class="btn-qty" onclick="updateCartQty('${item.code}', -1)">-</button>
+                <span>${item.qty}</span>
+                <button class="btn-qty" onclick="updateCartQty('${item.code}', 1)">+</button>
+                <button class="btn-remove" onclick="removeFromCart('${item.code}')">&times;</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    updateCartSummary();
+}
+
+function updateCartSummary() {
+    let subtotal = 0;
+    cart.forEach(item => {
+        subtotal += item.price * item.qty;
+    });
+
+    const discountInput = document.getElementById("cart-discount");
+    let discountPercent = parseFloat(discountInput.value) || 0;
+    if (discountPercent < 0) discountPercent = 0;
+    if (discountPercent > 100) discountPercent = 100;
+
+    const discountAmount = (subtotal * discountPercent) / 100;
+    const finalTotal = subtotal - discountAmount;
+
+    document.getElementById("cart-subtotal").textContent = `Rs. ${subtotal.toFixed(2)}`;
+    document.getElementById("cart-total").textContent = `Rs. ${finalTotal.toFixed(2)}`;
+}
