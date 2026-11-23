@@ -1,19 +1,5 @@
-let customers = [
-    { id: "C001", name: "Kasun Perera", phone: "0771234567", address: "Galle Road, Colombo" },
-    { id: "C002", name: "Nimal Fernando", phone: "0719876543", address: "Kandy" },
-    { id: "C003", name: "Amali Silva", phone: "0755554321", address: "Negombo" }
-];
-
-let items = [
-    { code: "B001", name: "Classic Beef Burger", category: "Burgers", price: 850.00, stock: 35, icon: "🍔" },
-    { code: "B002", name: "Crispy Chicken Burger", category: "Burgers", price: 750.00, stock: 40, icon: "🍔" },
-    { code: "B003", name: "Cheese Blast Burger", category: "Burgers", price: 950.00, stock: 25, icon: "🍔" },
-    { code: "F001", name: "Golden French Fries", category: "Fries", price: 400.00, stock: 50, icon: "🍟" },
-    { code: "F002", name: "Cheesy Loaded Fries", category: "Fries", price: 650.00, stock: 20, icon: "🍟" },
-    { code: "D001", name: "Chilled Coca-Cola", category: "Drinks", price: 200.00, stock: 60, icon: "🥤" },
-    { code: "D002", name: "Chocolate Milkshake", category: "Drinks", price: 450.00, stock: 30, icon: "🥤" }
-];
-
+let customers = [];
+let items = [];
 let cart = [];
 let orders = [];
 let orderCounter = 1;
@@ -181,8 +167,11 @@ function initItemCRUD() {
     const catInput = document.getElementById("item-category");
     const priceInput = document.getElementById("item-price");
     const qtyInput = document.getElementById("item-qty");
+    const imageInput = document.getElementById("item-image");
     const formTitle = document.getElementById("item-form-title");
     const btnCancel = document.getElementById("btn-cancel-item");
+
+    let currentEditingImage = "";
 
     renderItemTable();
 
@@ -191,38 +180,47 @@ function initItemCRUD() {
 
         const editCode = editCodeInput.value;
         const category = catInput.value;
+        const file = imageInput.files[0];
 
-        let icon = "🍔";
-        if (category === "Fries") icon = "🍟";
-        if (category === "Drinks") icon = "🥤";
+        const saveItemData = (imageSrc) => {
+            const itemData = {
+                code: codeInput.value.trim(),
+                name: nameInput.value.trim(),
+                category: category,
+                price: parseFloat(priceInput.value),
+                stock: parseInt(qtyInput.value),
+                image: imageSrc
+            };
 
-        const itemData = {
-            code: codeInput.value.trim(),
-            name: nameInput.value.trim(),
-            category: category,
-            price: parseFloat(priceInput.value),
-            stock: parseInt(qtyInput.value),
-            icon: icon
+            if (editCode) {
+                const index = items.findIndex(i => i.code === editCode);
+                if (index !== -1) {
+                    items[index] = itemData;
+                }
+            } else {
+                const exists = items.some(i => i.code.toLowerCase() === itemData.code.toLowerCase());
+                if (exists) {
+                    alert("Item Code already exists!");
+                    return;
+                }
+                items.push(itemData);
+            }
+
+            saveStoredData();
+            renderItemTable();
+            renderProductGrid();
+            resetItemForm();
         };
 
-        if (editCode) {
-            const index = items.findIndex(i => i.code === editCode);
-            if (index !== -1) {
-                items[index] = itemData;
-            }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                saveItemData(event.target.result);
+            };
+            reader.readAsDataURL(file);
         } else {
-            const exists = items.some(i => i.code.toLowerCase() === itemData.code.toLowerCase());
-            if (exists) {
-                alert("Item Code already exists!");
-                return;
-            }
-            items.push(itemData);
+            saveItemData(currentEditingImage || getDefaultImage(category));
         }
-
-        saveStoredData();
-        renderItemTable();
-        renderProductGrid();
-        resetItemForm();
     });
 
     btnCancel.addEventListener("click", resetItemForm);
@@ -230,20 +228,34 @@ function initItemCRUD() {
     function resetItemForm() {
         form.reset();
         editCodeInput.value = "";
+        currentEditingImage = "";
         codeInput.disabled = false;
         formTitle.textContent = "Add New Food Item";
     }
+}
+
+function getDefaultImage(category) {
+    if (category === "Burgers") return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=60";
+    if (category === "Fries") return "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=400&auto=format&fit=crop&q=60";
+    return "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&auto=format&fit=crop&q=60";
 }
 
 function renderItemTable() {
     const tbody = document.getElementById("item-table-body");
     tbody.innerHTML = "";
 
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No items added yet. Click '+ Add Item' above to add one.</td></tr>`;
+        return;
+    }
+
     items.forEach(item => {
+        const imgSrc = item.image || getDefaultImage(item.category);
         const tr = document.createElement("tr");
         tr.innerHTML = `
+            <td><img src="${imgSrc}" class="table-item-img" alt="${item.name}"></td>
             <td>${item.code}</td>
-            <td>${item.icon} ${item.name}</td>
+            <td>${item.name}</td>
             <td>${item.category}</td>
             <td>Rs. ${item.price.toFixed(2)}</td>
             <td>${item.stock}</td>
@@ -269,6 +281,7 @@ function editItem(code) {
     document.getElementById("item-category").value = item.category;
     document.getElementById("item-price").value = item.price;
     document.getElementById("item-qty").value = item.stock;
+    currentEditingImage = item.image || "";
     document.getElementById("item-form-title").textContent = "Edit Item: " + item.code;
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -329,11 +342,19 @@ function renderProductGrid() {
         ? items 
         : items.filter(item => item.category === selectedCategory);
 
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No food items available in this category. Go to 'Items' section to add items.</div>`;
+        return;
+    }
+
     filtered.forEach(item => {
+        const imgSrc = item.image || getDefaultImage(item.category);
         const card = document.createElement("div");
         card.className = "item-card";
         card.innerHTML = `
-            <div class="item-icon">${item.icon}</div>
+            <div class="item-img-container">
+                <img src="${imgSrc}" class="item-img" alt="${item.name}">
+            </div>
             <div class="item-name">${item.name}</div>
             <div class="item-price">Rs. ${item.price.toFixed(2)}</div>
             <div class="item-stock">Stock: ${item.stock}</div>
